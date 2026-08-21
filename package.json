@@ -26,6 +26,11 @@
   "devDependencies": {
     "sharp": "^0.34.0"
   },
+  "optionalDependencies": {
+    "@esbuild/darwin-arm64": "0.25.12",
+    "@esbuild/darwin-x64": "0.25.12",
+    "@esbuild/linux-x64": "0.25.12"
+  },
   "engines": {
     "node": ">=20"
   },
