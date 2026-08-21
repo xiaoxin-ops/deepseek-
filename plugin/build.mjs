@@ -92,7 +92,10 @@ async function main() {
 }
 
 main().catch((error) => {
+  const message = error instanceof Error ? error.message : String(error)
   console.error(error instanceof Error ? error.stack ?? error.message : String(error))
+  // Workflow-command annotations surface in the check-run annotations API.
+  console.log(`::error title=dsh-blue-whale plugin build::${message.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A')}`)
   const summary = process.env.GITHUB_STEP_SUMMARY
   if (typeof summary === 'string' && summary !== '') {
     const facts = [
@@ -100,7 +103,7 @@ main().catch((error) => {
       `- platform: ${process.platform} / ${process.arch}`,
       `- node: ${process.version}`,
       `- cwd: ${process.cwd()}`,
-      `- error: ${error instanceof Error ? error.message : String(error)}`,
+      `- error: ${message}`,
     ]
     writeFile(summary, `${facts.join('\n')}\n`, { flag: 'a' }).catch(() => {})
   }
