@@ -15,7 +15,7 @@
 import { spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 import { mkdir } from 'node:fs/promises'
-import { dirname, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const require = createRequire(import.meta.url)
@@ -29,8 +29,10 @@ const pkg = platform === 'win32'
   ? '@esbuild/win32-x64'
   : platform === 'darwin'
     ? (arch === 'arm64' ? '@esbuild/darwin-arm64' : '@esbuild/darwin-x64')
-    : '@esbuild/linux-x64'
-const binary = require.resolve(`${pkg}/esbuild${platform === 'win32' ? '.exe' : ''}`)
+    : (arch === 'arm64' ? '@esbuild/linux-arm64' : '@esbuild/linux-x64')
+// Resolve through the package's own package.json so any exports-map shape
+// (or its absence) never blocks the binary subpath, then join by hand.
+const binary = join(dirname(require.resolve(`${pkg}/package.json`)), platform === 'win32' ? 'esbuild.exe' : 'esbuild')
 
 const baseArgs = [
   '--bundle',

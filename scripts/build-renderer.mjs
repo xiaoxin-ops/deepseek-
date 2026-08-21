@@ -11,7 +11,7 @@
 import { spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 import { mkdir, readFile, writeFile, copyFile, rm } from 'node:fs/promises'
-import { dirname, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const require = createRequire(import.meta.url)
@@ -27,8 +27,9 @@ function esbuildBinary() {
     ? '@esbuild/win32-x64'
     : platform === 'darwin'
       ? (arch === 'arm64' ? '@esbuild/darwin-arm64' : '@esbuild/darwin-x64')
-      : '@esbuild/linux-x64'
-  return require.resolve(`${pkg}/esbuild${platform === 'win32' ? '.exe' : ''}`)
+      : (arch === 'arm64' ? '@esbuild/linux-arm64' : '@esbuild/linux-x64')
+  // Resolve through the package's own package.json (exports-map agnostic).
+  return join(dirname(require.resolve(`${pkg}/package.json`)), platform === 'win32' ? 'esbuild.exe' : 'esbuild')
 }
 
 await rm(distDir, { recursive: true, force: true })
