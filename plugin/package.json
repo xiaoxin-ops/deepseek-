@@ -2,6 +2,15 @@
   "name": "dsh-blue-whale",
   "version": "0.1.0",
   "description": "蓝鲸鱼 desktop bridge: the native-desktop channel (tray, notifications, window control) for the DeepSeek Harness web GUI. Host half owns the /blue-whale WebSocket channel the desktop shell connects to; the client half provides the dshDesktop service and completion notifications.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xiaoxin-ops/deepseek-.git",
+    "directory": "plugin"
+  },
+  "author": {
+    "name": "xiaoxin-ops",
+    "email": "1219068231@qq.com"
+  },
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",

@@ -2,6 +2,8 @@
 
 DeepSeek Harness 的原生桌面客户端：**Electron + Vue 3 + TypeScript** 桌面壳 + **dsh-blue-whale** 桥接插件。
 
+仓库：<https://github.com/xiaoxin-ops/deepseek-> · 安装包见 Releases 与 Actions 产物
+
 - **核心集成**：自动启动并托管本地 `dsh web` 服务（崩溃自动重启、退出优雅关闭），把官方 Web UI 嵌入原生窗口
 - **原生体验**：系统托盘、桌面通知（会话完成等）、自定义应用菜单、隐藏到托盘、单实例
 - **一切皆插件**：桌面集成能力全部来自 `dsh-blue-whale` 插件，经官方 `dsh plugin` 通道安装，与官方生态无缝组合；纯浏览器打开同一 UI 时插件完全惰性

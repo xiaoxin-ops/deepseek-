@@ -5,8 +5,14 @@
   "private": true,
   "description": "蓝鲸鱼 — DeepSeek Harness 桌面客户端外壳（进程托管 + 原生体验，桌面集成能力全部来自 dsh-blue-whale 插件）",
   "main": "dist-electron/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xiaoxin-ops/deepseek-.git",
+    "directory": "app"
+  },
   "author": {
-    "name": "dsh-blue-whale contributors"
+    "name": "xiaoxin-ops",
+    "email": "1219068231@qq.com"
   },
   "license": "MIT",
   "scripts": {
