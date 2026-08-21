@@ -29,6 +29,7 @@
     "appId": "com.dsh.bluewhale",
     "productName": "蓝鲸鱼",
     "asar": true,
+    "npmRebuild": false,
     "directories": {
       "output": "dist-packages"
     },

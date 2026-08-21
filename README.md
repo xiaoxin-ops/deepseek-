@@ -35,9 +35,11 @@ npm run plugin:pack               # 打包插件 tarball 到 dist/
 
 # 1) 把插件装进测试 profile（不动你现有的 web profile）
 #    确保 PATH 里有 pnpm；或使用 .runtime\npm-global\node_modules\.bin\pnpm.cmd
-dsh plugin --profile web-bw-test add @deepseek-ai/dsh-web-app ./dist/dsh-blue-whale-0.1.0.tgz
+$env:DSH_HOME = '<隔离 DSH_HOME>'    # 可选：完全隔离的测试环境
+dsh plugin --profile web-bw-test add -w '@deepseek-ai/dsh-web-app@0.1.1-rc.1' ./dist/dsh-blue-whale-0.1.0.tgz
+dsh plugin --profile web-bw-test add -w 'react@18.3.1' 'react-dom@18.3.1'
 
-# 2) 开发模式启动桌面壳
+# 2) 开发模式启动桌面壳（设置窗口里把 Profile 改为 web-bw-test）
 npm run app:dev
 ```
 
@@ -46,12 +48,14 @@ npm run app:dev
 ## 构建安装包
 
 ```powershell
-npm run app:dist        # 本机产出 Windows NSIS .exe + MSI（dist-packages/）
+npm run app:dist        # 本机产出 Windows NSIS .exe + MSI（app/dist-packages/）
 ```
 
 macOS .dmg 由 GitHub Actions 产出（`.github/workflows/build.yml`，windows/macos 双平台）。
 
 ## 文档
 
+- 安装与使用：[INSTALL.md](INSTALL.md)
 - 架构与设计：[docs/architecture.md](docs/architecture.md)
+- 开发与联调：[docs/development.md](docs/development.md)
 - 插件协议：[plugin/README.zh.md](plugin/README.zh.md)

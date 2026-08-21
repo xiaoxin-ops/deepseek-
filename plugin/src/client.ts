@@ -92,7 +92,8 @@ export function apply(ctx: CtxLike): void {
 
   // Diff the sessions list on the running bit: a true -> false edge means a
   // turn just settled. First observation only records the bit (the official
-  // manager applies the same rule to its own "done" reminder).
+  // manager applies the same rule to its own "done" reminder). The list
+  // snapshot is `{ ids, byId, current }` (SessionListState).
   const seen = new Map<string, boolean>()
   const scan = (): void => {
     let snapshot: unknown
@@ -101,29 +102,23 @@ export function apply(ctx: CtxLike): void {
     } catch {
       return
     }
-    const rows: unknown[] = Array.isArray((snapshot as { entries?: unknown[] })?.entries)
-      ? ((snapshot as { entries: unknown[] }).entries)
-      : Array.isArray((snapshot as { rows?: unknown[] })?.rows)
-        ? ((snapshot as { rows: unknown[] }).rows)
-        : []
-    for (const row of rows) {
+    const record = snapshot as { ids?: string[]; byId?: Record<string, Record<string, unknown>> }
+    const ids = Array.isArray(record.ids) ? record.ids : []
+    const byId = record.byId ?? {}
+    for (const id of ids) {
+      const row = byId[id]
       if (row === null || typeof row !== 'object') continue
-      const record = row as Record<string, unknown>
-      const id = record.id
-      if (typeof id !== 'string') continue
-      const running = record.running === true
+      const running = row.running === true
       const was = seen.get(id)
       seen.set(id, running)
       if (was === true && !running) {
-        const title = typeof record.title === 'string' && record.title !== '' ? record.title : undefined
-        const label = typeof record.label === 'string' && record.label !== '' ? record.label : undefined
-        service.notify({ title: doneTitle(), body: label ?? title ?? id })
+        const title = typeof row.title === 'string' && row.title !== '' ? row.title : undefined
+        const displayTitle = typeof row.displayTitle === 'string' && row.displayTitle !== '' ? row.displayTitle : undefined
+        service.notify({ title: doneTitle(), body: title ?? displayTitle ?? id })
       }
     }
     for (const id of [...seen.keys()]) {
-      if (!rows.some((row) => row !== null && typeof row === 'object' && (row as Record<string, unknown>).id === id)) {
-        seen.delete(id)
-      }
+      if (!ids.includes(id)) seen.delete(id)
     }
   }
 
