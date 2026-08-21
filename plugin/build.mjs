@@ -1,8 +1,13 @@
 /**
  * dsh-blue-whale build: esbuild the host half (Node ESM) and the client half
- * (browser ESM) into lib/. Mirrors the official plugins' layout:
+ * into lib/. Mirrors the official plugins' layout:
  *   lib/index.js    — node half, served as the loader entry
  *   lib/client.js   — browser half, served by /plugins/<id>/client.js
+ *
+ * The client half follows the official client-modules contract: the whole
+ * bundle body lives inside a `window.__ModuleLoader__.load({ id, factory })`
+ * registration (CJS factory form, exactly like the official plugins), so the
+ * module system can materialize it lazily.
  *
  * Invokes the platform esbuild binary directly (stdio inherit) so the build
  * also works inside sandboxes that forbid piped child stdio (EPERM).
@@ -52,7 +57,9 @@ run([
 run([
   ...baseArgs,
   '--platform=browser',
-  '--format=esm',
+  '--format=cjs',
+  '--banner:js=window.__ModuleLoader__.load({ id: "dsh-blue-whale", factory: function (require) { var module = { exports: {} }; var exports = module.exports;',
+  '--footer:js=return module.exports; } });',
   'src/client.ts',
   '--outfile=lib/client.js',
 ])
