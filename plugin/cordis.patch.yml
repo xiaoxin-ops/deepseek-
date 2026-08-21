@@ -1,0 +1,12 @@
+# dsh-blue-whale bundle patch
+#
+# Installed through the official CLI —
+#
+#   dsh plugin --profile <name> add <dsh-blue-whale spec>
+#
+# — the command reconciles `dsh.profile.bundles` against installed packages
+# and, seeing this declaration, appends `dsh-blue-whale` to the bundle stack.
+# No profile file edits needed: one command installs and mounts.
+- insert:
+    - id: blue-whale
+      name: dsh-blue-whale

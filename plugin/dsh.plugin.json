@@ -1,0 +1,12 @@
+{
+  "name": "dsh-blue-whale",
+  "description": "蓝鲸鱼 desktop bridge: native desktop channel for the DeepSeek Harness web GUI",
+  "version": "0.1.0",
+  "entry": {
+    "name": "dsh-blue-whale",
+    "inject": []
+  },
+  "client": {
+    "platform": "web"
+  }
+}

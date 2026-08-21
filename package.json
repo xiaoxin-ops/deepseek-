@@ -1,0 +1,25 @@
+{
+  "name": "dsh-blue-whale-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "蓝鲸鱼 (Blue Whale) — a native desktop client for DeepSeek Harness: Electron shell + dsh-blue-whale bridge plugin",
+  "workspaces": [
+    "plugin",
+    "app"
+  ],
+  "scripts": {
+    "plugin:build": "npm run build --workspace plugin",
+    "plugin:pack": "npm run pack --workspace plugin",
+    "app:dev": "npm run dev --workspace app",
+    "app:build": "npm run build --workspace app",
+    "app:dist": "npm run dist --workspace app",
+    "icon": "node scripts/make-icon.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

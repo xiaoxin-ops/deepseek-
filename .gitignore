@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+plugin/lib/
+plugin/dist/
+app/dist/
+app/dist-electron/
+app/dist-packages/
+app/release/
+
+# runtime
+*.log
+.runtime/
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/

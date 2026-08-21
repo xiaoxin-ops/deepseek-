@@ -1,0 +1,73 @@
+{
+  "name": "dsh-blue-whale-app",
+  "productName": "蓝鲸鱼",
+  "version": "0.1.0",
+  "private": true,
+  "description": "蓝鲸鱼 — DeepSeek Harness 桌面客户端外壳（进程托管 + 原生体验，桌面集成能力全部来自 dsh-blue-whale 插件）",
+  "main": "dist-electron/main.js",
+  "author": {
+    "name": "dsh-blue-whale contributors"
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "npm run build && electron .",
+    "build": "tsc -p tsconfig.electron.json && node ../scripts/build-renderer.mjs",
+    "typecheck": "tsc -p tsconfig.electron.json --noEmit",
+    "dist": "npm run build && electron-builder --publish never",
+    "dist:win": "npm run build && electron-builder --win --publish never",
+    "dist:mac": "npm run build && electron-builder --mac --publish never"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@vue/compiler-sfc": "^3.5.13",
+    "electron": "36.9.5",
+    "electron-builder": "^26.0.12",
+    "typescript": "^5.8.0",
+    "vue": "^3.5.13"
+  },
+  "build": {
+    "appId": "com.dsh.bluewhale",
+    "productName": "蓝鲸鱼",
+    "asar": true,
+    "directories": {
+      "output": "dist-packages"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../dist/dsh-blue-whale-0.1.0.tgz",
+        "to": "plugin/dsh-blue-whale.tgz"
+      }
+    ],
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "msi", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "蓝鲸鱼"
+    },
+    "mac": {
+      "icon": "build/icon.png",
+      "category": "public.app-category.developer-tools",
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] }
+      ]
+    },
+    "dmg": {
+      "title": "蓝鲸鱼"
+    },
+    "electronLanguages": ["zh-CN", "en-US", "zh_CN"]
+  }
+}

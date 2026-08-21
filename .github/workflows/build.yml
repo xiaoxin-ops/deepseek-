@@ -1,0 +1,59 @@
+name: build
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: dist:win
+            artifact: blue-whale-windows
+          - os: macos-latest
+            script: dist:mac
+            artifact: blue-whale-macos
+    runs-on: ${{ matrix.os }}
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate icons
+        run: node scripts/make-icon.mjs
+
+      - name: Build bridge plugin
+        run: npm run plugin:build
+
+      - name: Pack bridge plugin tarball
+        run: npm run plugin:pack
+
+      - name: Build app & installers (${{ matrix.script }})
+        run: npm run ${{ matrix.script }} --workspace app
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            app/dist-packages/*.exe
+            app/dist-packages/*.msi
+            app/dist-packages/*.dmg
+          if-no-files-found: error
