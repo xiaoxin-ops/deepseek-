@@ -11,6 +11,7 @@
 import { spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 import { mkdir, readFile, writeFile, copyFile, rm } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -29,7 +30,13 @@ function esbuildBinary() {
       ? (arch === 'arm64' ? '@esbuild/darwin-arm64' : '@esbuild/darwin-x64')
       : (arch === 'arm64' ? '@esbuild/linux-arm64' : '@esbuild/linux-x64')
   // Resolve through the package's own package.json (exports-map agnostic).
-  return join(dirname(require.resolve(`${pkg}/package.json`)), platform === 'win32' ? 'esbuild.exe' : 'esbuild')
+  try {
+    const binary = join(dirname(require.resolve(`${pkg}/package.json`)), platform === 'win32' ? 'esbuild.exe' : 'esbuild')
+    if (!existsSync(binary)) return null
+    return binary
+  } catch {
+    return null
+  }
 }
 
 await rm(distDir, { recursive: true, force: true })
@@ -51,19 +58,36 @@ const script = compileScript(parsed.descriptor, {
 })
 await writeFile(resolve(srcDir, 'App.generated.js'), script.content, 'utf8')
 
-// 2) bundle
+// 2) bundle — prefer the platform esbuild binary (sandbox-friendly direct
+// spawn); fall back to the in-process JS API when the binary file is absent
+// (CI runners with differing platform-package layouts).
 const bin = esbuildBinary()
-const bundle = spawnSync(bin, [
-  '--bundle',
-  '--platform=browser',
-  '--format=iife',
-  '--target=es2020',
-  '--minify',
-  `--outfile=${resolve(distDir, 'assets', 'app.js')}`,
-  resolve(srcDir, 'main.js'),
-], { stdio: 'inherit', cwd: srcDir })
-if (bundle.status !== 0) {
-  throw new Error(`renderer bundle failed with exit code ${bundle.status ?? 'null'}`)
+const bundleConfig = {
+  entryPoints: [resolve(srcDir, 'main.js')],
+  outfile: resolve(distDir, 'assets', 'app.js'),
+  bundle: true,
+  platform: 'browser',
+  format: 'iife',
+  target: 'es2020',
+  minify: true,
+}
+if (bin !== null) {
+  const bundle = spawnSync(bin, [
+    '--bundle',
+    '--platform=browser',
+    '--format=iife',
+    '--target=es2020',
+    '--minify',
+    `--outfile=${bundleConfig.outfile}`,
+    bundleConfig.entryPoints[0],
+  ], { stdio: 'inherit', cwd: srcDir })
+  if (bundle.status !== 0) {
+    throw new Error(`renderer bundle failed with exit code ${bundle.status ?? 'null'}`)
+  }
+} else {
+  console.log('renderer: platform esbuild binary not found — falling back to the esbuild JS API')
+  const esbuild = await import('esbuild')
+  await esbuild.build({ ...bundleConfig, logLevel: 'info' })
 }
 
 // 3) static shell
