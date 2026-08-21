@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "plugin:build": "npm run build --workspace plugin",
-    "plugin:pack": "npm run pack --workspace plugin",
+    "plugin:pack": "node scripts/pack-plugin.mjs",
     "app:dev": "npm run dev --workspace app",
     "app:build": "npm run build --workspace app",
     "app:dist": "npm run dist --workspace app",

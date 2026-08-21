@@ -48,7 +48,7 @@
   "scripts": {
     "build": "node build.mjs",
     "typecheck": "tsc --noEmit",
-    "pack": "npm pack --workspaces=false --pack-destination ../dist"
+    "pack": "node ../scripts/pack-plugin.mjs"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
