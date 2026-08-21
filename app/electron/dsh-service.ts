@@ -46,6 +46,8 @@ export class DshService extends EventEmitter {
   private restartTimer: ReturnType<typeof setTimeout> | null = null
   private restartAttempts = 0
   private healthTimer: ReturnType<typeof setInterval> | null = null
+  private portConflictSeen = false
+  private portFallbackUsed = false
 
   constructor(options: DshServiceOptions) {
     super()
@@ -73,6 +75,8 @@ export class DshService extends EventEmitter {
 
   updateOptions(patch: Partial<DshServiceOptions>): void {
     this.options = { ...this.options, ...patch }
+    this.portFallbackUsed = false
+    this.portConflictSeen = false
   }
 
   /** Start (or restart) the harness. Resolves with the canonical URL once ready. */
@@ -84,6 +88,8 @@ export class DshService extends EventEmitter {
       }
       this.stopRequested = false
       this.restartAttempts = 0
+      this.portFallbackUsed = false
+      this.portConflictSeen = false
       this.spawnOnce(resolve, reject)
     })
   }
@@ -208,6 +214,9 @@ export class DshService extends EventEmitter {
       errLines.on('line', (line) => {
         log('dsh', `stderr: ${line}`)
         this.emit('line', `stderr: ${line}`)
+        if (/EADDRINUSE|address already in use/i.test(line)) {
+          this.portConflictSeen = true
+        }
       })
     }
 
@@ -267,6 +276,15 @@ export class DshService extends EventEmitter {
   /** Lazy health probe while running: a vanished port marks a crash that missed the exit event. */
   private scheduleRestart(): void {
     if (this.stopRequested || !this.options.autoRestart || this.restartTimer !== null) return
+    // Port-conflict fallback: when the configured port is taken, retry once
+    // with an OS-picked free port instead of looping forever on the same one.
+    if (this.portConflictSeen && !this.portFallbackUsed && this.options.port > 0) {
+      this.portFallbackUsed = true
+      this.portConflictSeen = false
+      log('dsh', `configured port ${this.options.port} is busy — falling back to an OS-picked port (0)`)
+      this.emit('line', `端口 ${String(this.options.port)} 已被占用，改用系统自动分配端口`)
+      this.options = { ...this.options, port: 0 }
+    }
     const delay = RESTART_DELAYS_MS[Math.min(this.restartAttempts, RESTART_DELAYS_MS.length - 1)] ?? 10000
     this.restartAttempts += 1
     log('dsh', `auto-restart in ${delay}ms (attempt ${this.restartAttempts})`)

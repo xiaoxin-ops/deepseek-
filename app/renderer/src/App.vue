@@ -180,7 +180,7 @@ onBeforeUnmount(() => {
             <input v-model="settings.profile" spellcheck="false" placeholder="web" />
           </label>
           <label class="field">
-            <span>端口（0 = 自动选择）</span>
+            <span>端口（0 = 自动选择空闲端口；端口被占用时自动降级为 0）</span>
             <input v-model.number="settings.port" type="number" min="0" max="65535" />
           </label>
           <label class="field">
